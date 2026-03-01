@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fraud Detection System</title>
+    <style>
+        body {
+            font-family: Arial;
+            background-color: #f4f6f9;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 400px;
+            margin: auto;
+            box-shadow: 0px 0px 15px rgba(0,0,0,0.1);
+        }
+
+        input {
+            width: 90%;
+            padding: 8px;
+            margin: 8px 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Credit Card Fraud Detection</h2>
+
+    <input type="number" id="amount" placeholder="Transaction Amount">
+    <input type="number" id="time" placeholder="Transaction Time">
+    <input type="number" id="age" placeholder="Customer Age">
+    <input type="number" id="merchant" placeholder="Merchant ID">
+    <input type="number" id="location" placeholder="Customer Location">
+
+    <br><br>
+   <button onclick="predict()" id="predictBtn">Predict</button>
+
+    <div id="result"></div>
+</div>
+
+<script>
+async function predict() {
+
+    const btn = document.getElementById("predictBtn");
+    btn.innerText = "Predicting...";
+    btn.disabled = true;
+
+    const data = {
+        transaction_amount: parseFloat(document.getElementById("amount").value),
+        transaction_time: parseInt(document.getElementById("time").value),
+        customer_age: parseInt(document.getElementById("age").value),
+        merchant_id: parseInt(document.getElementById("merchant").value),
+        customer_location: parseInt(document.getElementById("location").value)
+    };
+
+    try {
+        const response = await fetch("/predict", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        let color;
+        if (result.risk_level === "High Risk") {
+            color = "red";
+        } else if (result.risk_level === "Medium Risk") {
+            color = "orange";
+        } else {
+            color = "green";
+        }
+
+        document.getElementById("result").innerHTML =
+            `<div style="margin-top:20px;">
+                <h3>Fraud Probability: ${result.fraud_probability.toFixed(3)}</h3>
+                <h2 style="color:${color};">${result.risk_level}</h2>
+            </div>`;
+
+    } catch (error) {
+        document.getElementById("result").innerHTML =
+            `<div style="color:red; margin-top:20px;">
+                Error connecting to API
+            </div>`;
+    }
+
+    btn.innerText = "Predict";
+    btn.disabled = false;
+}
+</script>
+
+</body>
+</html>

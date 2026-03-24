@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>AI Credit Card Fraud Detection</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+/* THEME */
+
+:root{
+--bg:#0f172a;
+--card:#1e293b;
+--text:#e2e8f0;
+--accent:#6366f1;
+--border:#334155;
+}
+
+.light{
+--bg:#f4f6f9;
+--card:#ffffff;
+--text:#0f172a;
+--accent:#4f46e5;
+--border:#e2e8f0;
+}
+
+/* GLOBAL */
+
+body{
+font-family:'Segoe UI',sans-serif;
+background:var(--bg);
+color:var(--text);
+margin:0;
+padding:30px;
+display:flex;
+justify-content:center;
+}
+
+.container{
+max-width:1200px;
+width:100%;
+}
+
+/* HEADER */
+
+h1{
+text-align:center;
+margin-bottom:25px;
+}
+
+/* GRID */
+
+.dashboard{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:20px;
+}
+
+/* CARD */
+
+.card{
+background:var(--card);
+padding:20px;
+border-radius:14px;
+border:1px solid var(--border);
+box-shadow:0 8px 25px rgba(0,0,0,0.2);
+display:flex;
+flex-direction:column;
+min-height:320px;
+transition:0.3s;
+}
+
+.card:hover{
+transform:translateY(-5px);
+box-shadow:0 0 20px rgba(99,102,241,0.4);
+}
+
+/* INPUT */
+
+input{
+width:100%;
+padding:12px;
+margin:6px 0;
+border-radius:8px;
+border:1px solid var(--border);
+background:transparent;
+color:var(--text);
+box-sizing:border-box;
+transition:0.2s;
+}
+
+input:focus{
+outline:none;
+border-color:var(--accent);
+box-shadow:0 0 10px rgba(99,102,241,0.4);
+}
+
+/* BUTTON */
+
+button{
+padding:12px;
+margin-top:10px;
+background:linear-gradient(135deg,#6366f1,#8b5cf6);
+color:white;
+border:none;
+border-radius:8px;
+cursor:pointer;
+transition:0.2s;
+}
+
+button:hover{
+transform:scale(1.05);
+}
+
+/* RESULT */
+
+.result-box{
+height:100%;
+display:flex;
+flex-direction:column;
+justify-content:center;
+animation:fadeIn 0.5s ease;
+}
+
+/* RESULT ANIMATION */
+
+@keyframes fadeIn{
+from{
+opacity:0;
+transform:translateY(20px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+/* LOADER */
+
+.loader{
+border:4px solid rgba(255,255,255,0.2);
+border-top:4px solid #6366f1;
+border-radius:50%;
+width:40px;
+height:40px;
+animation:spin 1s linear infinite;
+margin:auto;
+}
+
+@keyframes spin{
+0%{transform:rotate(0deg);}
+100%{transform:rotate(360deg);}
+}
+
+/* CHART */
+
+.chart-box{
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+}
+
+.chart-box canvas{
+max-width:220px;
+}
+
+/* GLOW RESULT */
+
+.glow-green{
+box-shadow:0 0 15px rgba(34,197,94,0.6);
+}
+
+.glow-red{
+box-shadow:0 0 15px rgba(239,68,68,0.6);
+}
+
+.glow-orange{
+box-shadow:0 0 15px rgba(245,158,11,0.6);
+}
+
+/* TOGGLE */
+
+.toggle{
+position:fixed;
+top:15px;
+right:20px;
+padding:8px 12px;
+border-radius:20px;
+background:var(--card);
+border:1px solid var(--border);
+cursor:pointer;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:900px){
+.dashboard{
+grid-template-columns:1fr;
+}
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="toggle" onclick="toggleTheme()">🌗</div>
+
+<div class="container">
+
+<h1>AI Fraud Detection System</h1>
+
+<div class="dashboard">
+
+<!-- INPUT -->
+<div class="card">
+
+<h2>Transaction Analysis</h2>
+
+<input type="number" id="amount" placeholder="Transaction Amount">
+<input type="number" id="time" placeholder="Transaction Time">
+<input type="number" id="age" placeholder="Customer Age">
+<input type="number" id="merchant" placeholder="Merchant ID">
+<input type="number" id="location" placeholder="Customer Location">
+
+<button onclick="predict()" id="predictBtn">Analyze Transaction</button>
+
+</div>
+
+<!-- RESULT -->
+<div class="card">
+
+<h2>Prediction Result</h2>
+
+<div id="result" class="result-box">
+<p style="opacity:0.6">Run analysis to see result</p>
+</div>
+
+</div>
+
+<!-- CHART -->
+<div class="card chart-box">
+
+<h2>Fraud Analytics</h2>
+
+<canvas id="fraudChart"></canvas>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function toggleTheme(){
+document.body.classList.toggle("light")
+}
+
+let fraudChart = null;
+
+async function predict(){
+
+const btn=document.getElementById("predictBtn")
+btn.innerText="Analyzing..."
+btn.disabled=true
+
+/* SHOW LOADER */
+document.getElementById("result").innerHTML=`<div class="loader"></div>`
+
+const data={
+transaction_amount:parseFloat(document.getElementById("amount").value),
+transaction_time:parseInt(document.getElementById("time").value),
+customer_age:parseInt(document.getElementById("age").value),
+merchant_id:parseInt(document.getElementById("merchant").value),
+customer_location:parseInt(document.getElementById("location").value)
+}
+
+try{
+
+const response=await fetch("/predict",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify(data)
+})
+
+const result=await response.json()
+
+let color="lime"
+let glowClass="glow-green"
+
+if(result.risk_level=="High Risk"){
+color="red"
+glowClass="glow-red"
+}
+
+if(result.risk_level=="Medium Risk"){
+color="orange"
+glowClass="glow-orange"
+}
+
+let reasonsHTML=""
+
+if(result.fraud_reasons){
+reasonsHTML="<ul>"
+result.fraud_reasons.forEach(r=>{
+reasonsHTML+="<li>"+r+"</li>"
+})
+reasonsHTML+="</ul>"
+}
+
+document.getElementById("result").innerHTML=`
+<div class="${glowClass}" style="border:2px solid ${color}; padding:20px; border-radius:10px">
+<h3>Fraud Probability: ${result.fraud_probability.toFixed(3)}</h3>
+<h2 style="color:${color}">${result.risk_level}</h2>
+<h4>Possible Reasons</h4>
+${reasonsHTML}
+</div>
+`
+
+loadAnalytics()
+
+}catch(e){
+document.getElementById("result").innerHTML="Error fetching prediction"
+}
+
+btn.innerText="Analyze Transaction"
+btn.disabled=false
+
+}
+
+async function loadAnalytics(){
+
+try{
+
+const dashboard=await fetch("/dashboard")
+const dashData=await dashboard.json()
+
+const ctx=document.getElementById("fraudChart").getContext("2d")
+
+if(fraudChart){
+fraudChart.destroy()
+}
+
+fraudChart=new Chart(ctx,{
+type:'doughnut',
+data:{
+labels:["High Risk","Medium Risk","Low Risk"],
+datasets:[{
+data:[
+dashData.high_risk || 0,
+dashData.medium_risk || 0,
+dashData.low_risk || 0
+],
+backgroundColor:[
+"#ef4444",
+"#f59e0b",
+"#22c55e"
+]
+}]
+}
+})
+
+}catch(e){
+console.log("Chart load failed", e)
+}
+
+}
+
+window.onload = function(){
+loadAnalytics();
+}
+
+</script>
+
+</body>
+</html>

@@ -11,100 +11,102 @@
 
 ## 🚀 Live Demo
 
-🌐 **Frontend + API:**  
+🌐 **Full Application (Frontend + API):**  
 👉 https://credit-fraud-api.up.railway.app  
 
-📘 **Swagger Docs:**  
+📘 **Interactive API Docs (Swagger):**  
 👉 https://credit-fraud-api.up.railway.app/docs  
 
 ---
 
-
 ## 📊 Project Overview
 
-A full-stack Machine Learning system that detects fraudulent credit card transactions in real time.
+A **production-ready end-to-end Machine Learning system** designed to detect fraudulent credit card transactions in real time.
 
-This project covers the **complete ML lifecycle**:
+This project demonstrates the **complete ML lifecycle from data to deployment**:
 
-- 📊 Data Analysis
-- ⚖ Class Imbalance Handling
-- 🎯 Threshold Optimization
-- 🧠 Model Selection
-- 🚀 API Development
-- 🐳 Docker Containerization
-- ☁ Cloud Deployment
-- 🎨 Frontend Integration
+- 📊 Exploratory Data Analysis (EDA)
+- ⚖ Handling severe class imbalance
+- 🎯 Decision threshold optimization
+- 🧠 Model training & evaluation
+- 🚀 REST API development using FastAPI
+- 🐳 Docker containerization
+- ☁ Cloud deployment on Railway
+- 🎨 Interactive frontend dashboard
 
 ---
 
 ## 🏗 System Architecture
 
-
-User (Frontend UI)\
-↓\
-FastAPI Backend (Docker)\
-↓\
-StandardScaler (Preprocessing)\
-↓\
-Logistic Regression Model\
-↓\
-Threshold Optimization (0.3)\
-↓\
-Fraud Risk Classification\
-↓\
-JSON Response
-
+User (Frontend UI)  
+↓  
+FastAPI Backend (Dockerized)  
+↓  
+StandardScaler (Preprocessing)  
+↓  
+Logistic Regression Model  
+↓  
+Threshold Optimization (0.3)  
+↓  
+Fraud Risk Classification  
+↓  
+JSON Response  
 
 ---
 
 ## 🧠 Business Objective
 
-Fraud detection is an **imbalanced classification problem**.
+Fraud detection is a **highly imbalanced classification problem**, where:
 
-### Risk Analysis
+- ❌ False Negative → Fraud goes undetected → Financial loss  
+- ❌ False Positive → Legitimate transaction blocked → Poor user experience  
 
-- ❌ False Negative → Fraud missed → Financial loss
-- ❌ False Positive → Genuine blocked → Customer frustration
+### 🎯 Approach
 
-### Strategy
+The model is optimized for:
 
-We optimized for **high Recall on Fraud class** while maintaining reasonable precision.
+- ✅ **High Recall on Fraud Class** (to minimize missed frauds)  
+- ⚖ Balanced Precision to reduce false alarms  
 
 ---
 
 ## 📈 Model Performance
 
-| Metric | Fraud Class |
-|--------|-------------|
-| Recall | ~0.93 |
-| Precision | ~0.54 |
+| Metric        | Value |
+|--------------|------|
+| Recall (Fraud) | ~0.93 |
+| Precision (Fraud) | ~0.54 |
 | ROC-AUC | ~0.95 |
 
-Threshold optimized at:
+### 🔍 Threshold Optimization
+Default threshold (0.5) was adjusted to:
 
 
 0.3
 
 
+to improve fraud detection sensitivity.
+
 ---
 
 ## 🛠 Tech Stack
 
-### Backend
+### 🔹 Backend
 - Python
 - FastAPI
 - Scikit-learn
 - Uvicorn
 
-### Frontend
+### 🔹 Frontend
 - HTML
 - CSS
-- Vanilla JavaScript
+- JavaScript (Vanilla)
+- Chart.js
 
-### Deployment
+### 🔹 Deployment
 - Docker
 - Docker Hub
-- Railway
+- Railway (Cloud Hosting)
 
 ---
 
@@ -117,14 +119,13 @@ Credit_Card_Fraud_Detection/
 ├── api.py\
 ├── Dockerfile\
 ├── requirements.txt\
-├── models/\
+├── models/
 │ ├── best_model.pkl\
 │ ├── scaler.pkl\
+│\
 ├── static/\
 │ └── index.html\
-├── notebooks/\
-│ ├── 1_EDA.ipynb\
-│ ├── 2_Modeling.ipynb\
+│
 └── README.md
 
 
@@ -136,17 +137,30 @@ Credit_Card_Fraud_Detection/
 docker build -t fraud-api .
 docker run -p 8000:8000 fraud-api
 ```
-Open:
+Open in browser:
 
 http://localhost:8000
 
-#### 🚀 Run Without Docker
-pip install -r requirements.txt\
+
+## 🚀 Run Without Docker
+
+```
+pip install -r requirements.txt
 uvicorn api:app --reload
+```
 
-## 👩‍💻 Author
+## ✨ Key Highlights
+🚀 Real-time fraud prediction API\
+🎯 Threshold tuning for business impact\
+📊 Interactive dashboard visualization\
+🐳 Fully containerized application\
+☁ Deployed on cloud (Railway)\
+💡 Designed with production readiness in mind
 
-Tejaswini Madarapu
+
+# 👩‍💻 Author
+
+## Tejaswini Madarapu
 
 🔗 LinkedIn:
 https://www.linkedin.com/in/tejaswini-madarapu/

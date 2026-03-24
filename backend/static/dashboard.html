@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Fraud Analytics Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f4f6f9;
+text-align:center;
+padding:40px;
+}
+
+.container{
+background:white;
+padding:30px;
+border-radius:10px;
+width:600px;
+margin:auto;
+box-shadow:0px 0px 15px rgba(0,0,0,0.1);
+}
+
+canvas{
+margin-top:30px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Fraud Detection Dashboard</h2>
+
+<h3 id="total"></h3>
+
+<canvas id="fraudChart"></canvas>
+
+</div>
+
+<script>
+
+async function loadDashboard(){
+
+const response = await fetch("/dashboard")
+const data = await response.json()
+
+document.getElementById("total").innerText =
+"Total Transactions: " + data.total_transactions
+
+const ctx = document.getElementById('fraudChart')
+
+new Chart(ctx,{
+type:'pie',
+data:{
+labels:["High Risk","Medium Risk","Low Risk"],
+datasets:[{
+data:[
+data.high_risk,
+data.medium_risk,
+data.low_risk
+],
+backgroundColor:[
+"#ff4d4d",
+"#ffa500",
+"#4CAF50"
+]
+}]
+}
+})
+
+}
+
+loadDashboard()
+
+</script>
+
+</body>
+</html>

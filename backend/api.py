@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.INFO)
 # ---------------------------------------------------
 # Load Model and Scaler
 # ---------------------------------------------------
-model = pickle.load(open("../models/fraud_model.pkl", "rb"))
+model = pickle.load(open("models/fraud_model.pkl", "rb"))
 scaler = pickle.load(open("scaler.pkl", "rb"))
 
 # ---------------------------------------------------

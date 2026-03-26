@@ -12,15 +12,23 @@ from datetime import datetime
 logging.basicConfig(level=logging.INFO)
 
 # ---------------------------------------------------
-# Load Model and Scaler
+# Load Model and Scaler (FIXED ✅)
 # ---------------------------------------------------
 
-model_path = os.path.join("models", "fraud_model.pkl")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+model_path = os.path.join(BASE_DIR, "..", "models", "fraud_model.pkl")
+scaler_path = os.path.join(BASE_DIR, "..", "models", "scaler.pkl")
+
 model = pickle.load(open(model_path, "rb"))
+scaler = pickle.load(open(scaler_path, "rb"))
+
 # ---------------------------------------------------
 # Database Setup
 # ---------------------------------------------------
-conn = sqlite3.connect("fraud_system.db", check_same_thread=False)
+
+db_path = os.path.join(BASE_DIR, "fraud_system.db")
+conn = sqlite3.connect(db_path, check_same_thread=False)
 cursor = conn.cursor()
 
 cursor.execute("""
@@ -40,12 +48,12 @@ conn.commit()
 # ---------------------------------------------------
 # Initialize FastAPI
 # ---------------------------------------------------
+
 app = FastAPI(
     title="Credit Card Fraud Detection API",
     version="2.0"
 )
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 
 if os.path.exists(STATIC_DIR):
@@ -53,7 +61,7 @@ if os.path.exists(STATIC_DIR):
 
     @app.get("/")
     def serve_home():
-        return FileResponse(os.path.join(STATIC_DIR, "index.html"))
+        return FileResponse(os.path.join(STATIC_DIR, "dashboard.html"))
 else:
     @app.get("/")
     def serve_home():
@@ -63,10 +71,10 @@ else:
 def open_dashboard():
     return FileResponse(os.path.join(STATIC_DIR, "dashboard.html"))
 
-
 # ---------------------------------------------------
 # Input Schema
 # ---------------------------------------------------
+
 class Transaction(BaseModel):
     transaction_amount: float = Field(..., gt=0)
     transaction_time: int = Field(..., ge=0)
@@ -74,12 +82,11 @@ class Transaction(BaseModel):
     merchant_id: int
     customer_location: int
 
-
 # ---------------------------------------------------
 # Fraud Explanation
 # ---------------------------------------------------
-def explain_fraud(transaction, probability):
 
+def explain_fraud(transaction, probability):
     reasons = []
 
     if transaction.transaction_amount > 2000:
@@ -99,15 +106,13 @@ def explain_fraud(transaction, probability):
 
     return reasons
 
-
 # ---------------------------------------------------
 # Prediction Endpoint
 # ---------------------------------------------------
+
 @app.post("/predict")
 def predict(transaction: Transaction):
-
     try:
-
         data = np.array([[
             transaction.transaction_amount,
             transaction.transaction_time,
@@ -117,26 +122,21 @@ def predict(transaction: Transaction):
         ]])
 
         data_scaled = scaler.transform(data)
-
         prob = model.predict_proba(data_scaled)[0][1]
 
-        # Add rule-based fraud indicators
+        # Rule-based adjustments
         if transaction.transaction_amount > 4000:
             prob += 0.4
-
         if transaction.transaction_time < 3:
             prob += 0.2
-
         if transaction.customer_age < 21:
             prob += 0.2
 
         prob = min(prob, 1.0)
 
-
         threshold = 0.3
         prediction = int(prob >= threshold)
 
-        # (better spread)
         if prob >= 0.8:
             risk = "High Risk"
         elif prob >= 0.2:
@@ -146,7 +146,7 @@ def predict(transaction: Transaction):
 
         reasons = explain_fraud(transaction, prob)
 
-        # Save transaction to database
+        # Save to DB
         cursor.execute("""
         INSERT INTO transactions
         (amount, time, age, merchant_id, probability, risk_level, timestamp)
@@ -160,7 +160,6 @@ def predict(transaction: Transaction):
             risk,
             datetime.now().isoformat()
         ))
-
         conn.commit()
 
         return {
@@ -172,17 +171,15 @@ def predict(transaction: Transaction):
 
     except Exception as e:
         logging.error(f"Prediction error: {e}")
-        return {"error": "Prediction failed"}
+        return {"error": str(e)}
 
-
-
-
+# ---------------------------------------------------
+# Dashboard API
+# ---------------------------------------------------
 
 @app.get("/dashboard")
 def fraud_dashboard():
-
     try:
-
         cursor.execute("SELECT COUNT(*) FROM transactions")
         total_transactions = cursor.fetchone()[0]
 
@@ -205,12 +202,12 @@ def fraud_dashboard():
     except Exception as e:
         return {"error": str(e)}
 
-
-
+# ---------------------------------------------------
+# Model Metrics
+# ---------------------------------------------------
 
 @app.get("/model-metrics")
 def model_metrics():
-
     return {
         "confusion_matrix": [[75, 11], [1, 13]],
         "accuracy": 0.88,

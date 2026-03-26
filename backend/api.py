@@ -55,11 +55,13 @@ app = FastAPI(
 )
 
 from fastapi.responses import FileResponse
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 @app.get("/")
 def serve_home():
     return FileResponse(os.path.join(BASE_DIR, "templates", "index.html"))
-
 # ---------------------------------------------------
 # Input Schema
 # ---------------------------------------------------

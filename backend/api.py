@@ -54,22 +54,11 @@ app = FastAPI(
     version="2.0"
 )
 
-STATIC_DIR = os.path.join(BASE_DIR, "static")
+from fastapi.responses import FileResponse
 
-if os.path.exists(STATIC_DIR):
-    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-
-    @app.get("/")
-    def serve_home():
-        return FileResponse(os.path.join(STATIC_DIR, "dashboard.html"))
-else:
-    @app.get("/")
-    def serve_home():
-        return {"message": "Frontend not available"}
-
-@app.get("/fraud-dashboard")
-def open_dashboard():
-    return FileResponse(os.path.join(STATIC_DIR, "dashboard.html"))
+@app.get("/")
+def serve_home():
+    return FileResponse(os.path.join(BASE_DIR, "templates", "index.html"))
 
 # ---------------------------------------------------
 # Input Schema

@@ -128,9 +128,9 @@ def predict(transaction: Transaction):
         threshold = 0.3
         prediction = int(prob >= threshold)
 
-        if prob >= 0.8:
+        if prob > 0.65:
             risk = "High Risk"
-        elif prob >= 0.2:
+        elif prob > 0.35:
             risk = "Medium Risk"
         else:
             risk = "Low Risk"

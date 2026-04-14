@@ -7,17 +7,6 @@
 ![Deployment](https://img.shields.io/badge/Deployment-Railway-purple)
 ![Status](https://img.shields.io/badge/Status-Live-success)
 
----
-
-## 🚀 Live Demo
-
-🌐 **Full Application (Frontend + API):**  
-👉 https://credit-fraud-api.up.railway.app  
-
-📘 **Interactive API Docs (Swagger):**  
-👉 https://credit-fraud-api.up.railway.app/docs  
-
----
 
 ## 📊 Project Overview
 
